@@ -236,15 +236,15 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-// winch support
+// winch support - enabled only on larger firmwares
 #ifndef WINCH_ENABLED
-# define WINCH_ENABLED DISABLED
+# define WINCH_ENABLED !HAL_MINIMIZE_FEATURES
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
 // rotations per minute sensor support
 #ifndef RPM_ENABLED
- # define RPM_ENABLED !HAL_MINIMIZE_FEATURES
+# define RPM_ENABLED ENABLED
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -290,15 +290,15 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-// Drift - fly vehicle in altitude-held, coordinated-turn mode
-#ifndef MODE_DRIFT_ENABLED
-# define MODE_DRIFT_ENABLED ENABLED
+// SpiralTD - New Mode
+#ifndef MODE_SPIRALTD_ENABLED
+# define MODE_SPIRALTD_ENABLED ENABLED
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
-// flip - fly vehicle in flip in pitch and roll direction mode
-#ifndef MODE_FLIP_ENABLED
-# define MODE_FLIP_ENABLED ENABLED
+// Drift - fly vehicle in altitude-held, coordinated-turn mode
+#ifndef MODE_DRIFT_ENABLED
+# define MODE_DRIFT_ENABLED ENABLED
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -316,7 +316,7 @@
 //////////////////////////////////////////////////////////////////////////////
 // GuidedNoGPS mode - control vehicle's angles from GCS
 #ifndef MODE_GUIDED_NOGPS_ENABLED
-# define MODE_GUIDED_NOGPS_ENABLED !HAL_MINIMIZE_FEATURES
+# define MODE_GUIDED_NOGPS_ENABLED ENABLED
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
@@ -353,12 +353,6 @@
 // Throw - fly vehicle after throwing it in the air
 #ifndef MODE_THROW_ENABLED
 # define MODE_THROW_ENABLED ENABLED
-#endif
-
-//////////////////////////////////////////////////////////////////////////////
-// ZigZag - allow vehicle to fly in a zigzag manner with predefined point A B
-#ifndef MODE_ZIGZAG_ENABLED
-# define MODE_ZIGZAG_ENABLED !HAL_MINIMIZE_FEATURES
 #endif
 
 //////////////////////////////////////////////////////////////////////////////

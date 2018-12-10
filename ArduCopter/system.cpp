@@ -23,12 +23,13 @@ void Copter::init_ardupilot()
     // initialise serial port
     serial_manager.init_console();
 
+    // init vehicle capabilties
+    init_capabilities();
+
     hal.console->printf("\n\nInit %s"
                         "\n\nFree RAM: %u\n",
                         AP::fwversion().fw_string,
                         (unsigned)hal.util->available_memory());
-
-    init_capabilities();
 
     //
     // Report firmware version code expect on console (check of actual EEPROM format version is done in load_parameters function)
@@ -77,7 +78,7 @@ void Copter::init_ardupilot()
     winch_init();
 
     // initialise notify system
-    notify.init();
+    notify.init(true);
     notify_flight_mode();
 
     // initialise battery monitor
@@ -136,6 +137,9 @@ void Copter::init_ardupilot()
 
     // motors initialised so parameters can be sent
     ap.initialised_params = true;
+
+    // initialise which outputs Servo and Relay events can use
+    ServoRelayEvents.set_channel_mask(~motors->get_motor_mask());
 
     relay.init();
 
@@ -233,7 +237,7 @@ void Copter::init_ardupilot()
 
 #if MODE_AUTO_ENABLED == ENABLED
     // initialise mission library
-    mode_auto.mission.init();
+    mission.init();
 #endif
 
 #if MODE_SMARTRTL_ENABLED == ENABLED
@@ -243,12 +247,14 @@ void Copter::init_ardupilot()
 
     // initialise DataFlash library
 #if MODE_AUTO_ENABLED == ENABLED
-    DataFlash.set_mission(&mode_auto.mission);
+    DataFlash.set_mission(&mission);
 #endif
     DataFlash.setVehicle_Startup_Log_Writer(FUNCTOR_BIND(&copter, &Copter::Log_Write_Vehicle_Startup_Messages, void));
 
-    // initialise rc channels including setting mode
-    rc().init();
+    // initialise the flight mode and aux switch
+    // ---------------------------
+    reset_control_switch();
+    init_aux_switches();
 
     startup_INS_ground();
 
@@ -274,6 +280,9 @@ void Copter::init_ardupilot()
     // disable safety if requested
     BoardConfig.init_safety();
 
+    // default enable RC override
+    copter.ap.rc_override_enable = true;
+    
     hal.console->printf("\nReady to FLY ");
 
     // flag that initialisation has completed
@@ -599,6 +608,14 @@ void Copter::allocate_motors(void)
         AP_HAL::panic("Unable to allocate CircleNav");
     }
     AP_Param::load_object_from_eeprom(circle_nav, circle_nav->var_info);
+#endif
+
+#if MODE_SPIRALTD_ENABLED == ENABLED
+    spiral_nav = new AC_Spiral(inertial_nav, *ahrs_view, *pos_control);
+    if (spiral_nav == nullptr) {
+        AP_HAL::panic("Unable to allocate CircleNav");
+    }
+    AP_Param::load_object_from_eeprom(spiral_nav, spiral_nav->var_info);
 #endif
 
     // reload lines from the defaults file that may now be accessible
